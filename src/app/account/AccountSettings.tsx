@@ -10,27 +10,27 @@ const OPTIONS = [5, 10, 15, 20, 30];
 
 export function AccountSettings() {
   const router = useRouter();
-  const [supabase] = useState(createClient);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [newPerDay, setNewPerDay] = useState(10);
   const [saved, setSaved] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
+      const supabase = createClient();
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
       setUser({ id: data.user.id, email: data.user.email });
       const profile = await supabase.from("profiles").select("new_per_day").maybeSingle();
       if (profile.data) setNewPerDay(profile.data.new_per_day);
     })();
-  }, [supabase]);
+  }, []);
 
   async function changeLimit(value: number) {
     if (!user) return;
     setNewPerDay(value);
     setSaved(null);
     try {
-      await saveNewPerDay(supabase, user.id, value);
+      await saveNewPerDay(createClient(), user.id, value);
       setSaved("Saved.");
     } catch {
       setSaved("Couldn't save. Check your connection and try again.");
@@ -38,7 +38,7 @@ export function AccountSettings() {
   }
 
   async function logOut() {
-    await supabase.auth.signOut();
+    await createClient().auth.signOut();
     router.replace("/");
     router.refresh();
   }

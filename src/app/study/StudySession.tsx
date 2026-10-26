@@ -17,7 +17,6 @@ type Session =
 const EXTRA_NEW = 5;
 
 export function StudySession() {
-  const [supabase] = useState(createClient);
   const [session, setSession] = useState<Session>({ status: "loading" });
   const [revealed, setRevealed] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -25,6 +24,8 @@ export function StudySession() {
   useEffect(() => {
     (async () => {
       try {
+        // Created here, not during render, so building the site needs no keys.
+        const supabase = createClient();
         const { data } = await supabase.auth.getUser();
         if (!data.user) throw new Error("You're not logged in.");
         const progress = await loadProgress(supabase);
@@ -36,7 +37,7 @@ export function StudySession() {
         setSession({ status: "error", message: err instanceof Error ? err.message : "Couldn't load your progress." });
       }
     })();
-  }, [supabase]);
+  }, []);
 
   const current = session.status === "ready" ? session.queue[0] : undefined;
 
@@ -56,9 +57,9 @@ export function StudySession() {
       setSession({ ...session, states, queue: rest, done: session.done + 1 });
       setRevealed(false);
 
-      saveReview(supabase, session.userId, current.id, grade, result).catch(() => setSaveError(true));
+      saveReview(createClient(), session.userId, current.id, grade, result).catch(() => setSaveError(true));
     },
-    [session, current, supabase],
+    [session, current],
   );
 
   // Space or Enter checks, 1 to 4 rate. Dictation cards use their own form.
