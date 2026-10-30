@@ -9,7 +9,7 @@ Stack: Next.js 16 on Vercel, Supabase (email and password login, progress tables
 1. Create a Supabase project.
 2. In the Supabase SQL editor, run `supabase/migrations/20261026000000_init.sql`. It creates the progress tables with row-level security, so each user can only see their own rows.
 3. In Supabase under Authentication > URL Configuration, set the Site URL to your Vercel URL and add `https://<your-domain>/auth/callback` to the redirect URLs. Add `http://localhost:3000/auth/callback` too for local development.
-4. Copy `.env.example` to `.env.local` and fill in the project URL and publishable key (Project Settings > API Keys). Add the same two variables in Vercel.
+4. The project URL and publishable key are set in `src/lib/supabase/config.ts`. Both are public by design. To point the app at a different Supabase project, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (see `.env.example`) in `.env.local` or in Vercel.
 5. Run it:
 
 ```bash
