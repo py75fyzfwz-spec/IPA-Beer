@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Card, Grade } from "ts-fsrs";
-import { units } from "@/content";
+import { cardsInUnit, units } from "@/content";
+import { ProgressBar } from "@/components/ProgressBar";
 import type { StudyCard } from "@/content/types";
 import { loadProgress, saveReview } from "@/lib/progress";
+import { unitProgress } from "@/lib/unitProgress";
 import { buildQueue, newCard, RELEARN_WINDOW_MS, scheduler } from "@/lib/srs";
 import { CardView } from "./CardView";
 
@@ -94,6 +96,12 @@ export function StudySession() {
           {unit ? "All units" : "Study one unit"}
         </Link>
       </div>
+      {unit && cardsInUnit(unit.number).length > 0 && (
+        <ProgressBar
+          progress={unitProgress(cardsInUnit(unit.number), session.states)}
+          label={`Unit ${unit.number}: ${unit.title} progress`}
+        />
+      )}
       <div className="flex items-center justify-between text-sm text-muted">
         <span>{session.queue.length} left in this session</span>
         <span>{session.done} done</span>
