@@ -2,22 +2,14 @@
 
 Website for learning to read British English (RP) in IPA, built for a German-speaking pronunciation course. Learners go from single sounds to words to sentences, read each transcription aloud, check it against a real recording, and rate themselves. FSRS spaced repetition decides what comes up each day. Dictation cards work the other way: hear a word and type it in IPA on an on-screen symbol keyboard.
 
-Stack: Next.js 16 on Vercel, Supabase (email and password login, progress tables), [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs).
+Stack: Next.js 16 on Vercel, [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs). There are no accounts yet: progress is saved in the browser's localStorage, so each device keeps its own.
 
 ## Set up
-
-1. Create a Supabase project.
-2. In the Supabase SQL editor, run `supabase/migrations/20261026000000_init.sql`. It creates the progress tables with row-level security, so each user can only see their own rows.
-3. In Supabase under Authentication > URL Configuration, set the Site URL to your Vercel URL and add `https://<your-domain>/auth/callback` to the redirect URLs. Add `http://localhost:3000/auth/callback` too for local development.
-4. The project URL and publishable key are set in `src/lib/supabase/config.ts`. Both are public by design. To point the app at a different Supabase project, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (see `.env.example`) in `.env.local` or in Vercel.
-5. Run it:
 
 ```bash
 npm install
 npm run dev
 ```
-
-Only the publishable key is used. The service role key is never needed and must not be added to this project.
 
 ## How it fits together
 
@@ -26,10 +18,8 @@ Only the publishable key is used. The service role key is never needed and must 
 | `src/content/` | All learning content as data: the 44 sounds, words, sentences. Words and sentences are sample entries for now. |
 | `src/lib/srs.ts` | FSRS scheduling, unlock rules and the daily queue |
 | `src/lib/ipa.ts` | Splits transcriptions into phonemes and checks dictation answers |
-| `src/lib/progress.ts` | Reads and writes progress in Supabase |
+| `src/lib/progress.ts` | Reads and writes progress in localStorage |
 | `src/app/study/` | The study session and the card types |
-| `src/proxy.ts` | Refreshes the login session and protects `/study` and `/account` |
-| `supabase/migrations/` | Database schema |
 
 ### Adding content
 

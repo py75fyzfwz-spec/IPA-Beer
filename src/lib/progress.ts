@@ -1,33 +1,17 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { State, type Card, type Grade, type RecordLogItem } from "ts-fsrs";
 
-type StateRow = {
-  card_id: string;
-  due: string;
-  stability: number;
-  difficulty: number;
-  scheduled_days: number;
-  learning_steps: number;
-  reps: number;
-  lapses: number;
-  state: number;
-  last_review: string | null;
-};
+// Progress lives in this browser's localStorage for now. Each device keeps
+// its own progress; accounts and syncing can come later.
+const KEY = "ipa.progress.v1";
 
-function toCard(row: StateRow): Card {
-  return {
-    due: new Date(row.due),
-    stability: row.stability,
-    difficulty: row.difficulty,
-    elapsed_days: 0,
-    scheduled_days: row.scheduled_days,
-    learning_steps: row.learning_steps,
-    reps: row.reps,
-    lapses: row.lapses,
-    state: row.state as State,
-    last_review: row.last_review ? new Date(row.last_review) : undefined,
-  };
-}
+type StoredCard = Omit<Card, "due" | "last_review"> & { due: string; last_review?: string };
+
+type Stored = {
+  cards: Record<string, StoredCard>;
+  // Card ids first seen today, keyed by local date, to enforce the daily limit.
+  newByDay: Record<string, string[]>;
+  newPerDay: number;
+};
 
 export type Progress = {
   states: Map<string, Card>;
@@ -35,76 +19,60 @@ export type Progress = {
   newPerDay: number;
 };
 
-function startOfToday() {
+export const DEFAULT_NEW_PER_DAY = 10;
+
+function today() {
   const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
-// Loads everything the study screen needs for the signed-in user.
-// Row-level security means these queries only ever see their own rows.
-export async function loadProgress(supabase: SupabaseClient): Promise<Progress> {
-  const [states, log, profile] = await Promise.all([
-    supabase.from("review_state").select("*"),
-    supabase
-      .from("review_log")
-      .select("card_id")
-      .eq("state", State.New)
-      .gte("reviewed_at", startOfToday().toISOString()),
-    supabase.from("profiles").select("new_per_day").maybeSingle(),
-  ]);
-  if (states.error) throw states.error;
-  if (log.error) throw log.error;
-  if (profile.error) throw profile.error;
+function read(): Stored {
+  const empty: Stored = { cards: {}, newByDay: {}, newPerDay: DEFAULT_NEW_PER_DAY };
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return empty;
+    return { ...empty, ...(JSON.parse(raw) as Partial<Stored>) };
+  } catch {
+    return empty;
+  }
+}
 
+function write(data: Stored) {
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function toCard(c: StoredCard): Card {
+  return { ...c, due: new Date(c.due), last_review: c.last_review ? new Date(c.last_review) : undefined };
+}
+
+export function loadProgress(): Progress {
+  const data = read();
   return {
-    states: new Map((states.data as StateRow[]).map((r) => [r.card_id, toCard(r)])),
-    newToday: new Set(log.data.map((r) => r.card_id)).size,
-    newPerDay: profile.data?.new_per_day ?? 10,
+    states: new Map(Object.entries(data.cards).map(([id, c]) => [id, toCard(c)])),
+    newToday: data.newByDay[today()]?.length ?? 0,
+    newPerDay: data.newPerDay,
   };
 }
 
-// Saves one rating: the card's new state and a log entry of the old one.
-export async function saveReview(
-  supabase: SupabaseClient,
-  userId: string,
-  cardId: string,
-  grade: Grade,
-  result: RecordLogItem,
-) {
+// Saves one rating. Throws if the browser refuses to store it.
+export function saveReview(cardId: string, _grade: Grade, result: RecordLogItem) {
+  const data = read();
   const { card, log } = result;
-  const stateWrite = supabase.from("review_state").upsert({
-    user_id: userId,
-    card_id: cardId,
-    due: card.due.toISOString(),
-    stability: card.stability,
-    difficulty: card.difficulty,
-    scheduled_days: card.scheduled_days,
-    learning_steps: card.learning_steps,
-    reps: card.reps,
-    lapses: card.lapses,
-    state: card.state,
-    last_review: card.last_review?.toISOString() ?? null,
-    updated_at: new Date().toISOString(),
-  });
-  const logWrite = supabase.from("review_log").insert({
-    user_id: userId,
-    card_id: cardId,
-    rating: grade,
-    state: log.state,
-    due: log.due.toISOString(),
-    stability: log.stability,
-    difficulty: log.difficulty,
-    scheduled_days: log.scheduled_days,
-    learning_steps: log.learning_steps,
-    reviewed_at: log.review.toISOString(),
-  });
-  const [a, b] = await Promise.all([stateWrite, logWrite]);
-  if (a.error) throw a.error;
-  if (b.error) throw b.error;
+  data.cards[cardId] = { ...card, due: card.due.toISOString(), last_review: card.last_review?.toISOString() };
+  if (log.state === State.New) {
+    const day = today();
+    // Keep only today's list so the stored data doesn't grow forever.
+    data.newByDay = { [day]: [...new Set([...(data.newByDay[day] ?? []), cardId])] };
+  }
+  write(data);
 }
 
-export async function saveNewPerDay(supabase: SupabaseClient, userId: string, newPerDay: number) {
-  const { error } = await supabase.from("profiles").upsert({ user_id: userId, new_per_day: newPerDay });
-  if (error) throw error;
+export function saveNewPerDay(n: number) {
+  const data = read();
+  data.newPerDay = n;
+  write(data);
+}
+
+export function resetProgress() {
+  localStorage.removeItem(KEY);
 }

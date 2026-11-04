@@ -1,18 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Card, Grade } from "ts-fsrs";
 import type { StudyCard } from "@/content/types";
 import { loadProgress, saveReview } from "@/lib/progress";
 import { buildQueue, newCard, RELEARN_WINDOW_MS, scheduler } from "@/lib/srs";
-import { createClient } from "@/lib/supabase/client";
 import { CardView } from "./CardView";
 
 type Session =
   | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "ready"; userId: string; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
+  | { status: "ready"; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
 
 const EXTRA_NEW = 5;
 
@@ -22,21 +19,12 @@ export function StudySession() {
   const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        // Created here, not during render, so building the site needs no keys.
-        const supabase = createClient();
-        const { data } = await supabase.auth.getUser();
-        if (!data.user) throw new Error("You're not logged in.");
-        const progress = await loadProgress(supabase);
-        const now = new Date();
-        const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
-        const queue = buildQueue(progress.states, newLeft, now);
-        setSession({ status: "ready", userId: data.user.id, states: progress.states, queue, newLeft, done: 0 });
-      } catch (err) {
-        setSession({ status: "error", message: err instanceof Error ? err.message : "Couldn't load your progress." });
-      }
-    })();
+    // localStorage only exists in the browser, so load after the first render.
+    const progress = loadProgress();
+    const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
+    const queue = buildQueue(progress.states, newLeft, new Date());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSession({ status: "ready", states: progress.states, queue, newLeft, done: 0 });
   }, []);
 
   const current = session.status === "ready" ? session.queue[0] : undefined;
@@ -57,7 +45,11 @@ export function StudySession() {
       setSession({ ...session, states, queue: rest, done: session.done + 1 });
       setRevealed(false);
 
-      saveReview(createClient(), session.userId, current.id, grade, result).catch(() => setSaveError(true));
+      try {
+        saveReview(current.id, grade, result);
+      } catch {
+        setSaveError(true);
+      }
     },
     [session, current],
   );
@@ -82,15 +74,6 @@ export function StudySession() {
     return <p className="text-muted">Loading your cards…</p>;
   }
 
-  if (session.status === "error") {
-    return (
-      <div className="flex flex-col gap-2">
-        <p className="text-again" role="alert">{session.message}</p>
-        <Link href="/login" className="underline">Log in again</Link>
-      </div>
-    );
-  }
-
   const learnMore = () => {
     const queue = buildQueue(session.states, EXTRA_NEW, new Date());
     setSession({ ...session, queue });
@@ -105,8 +88,8 @@ export function StudySession() {
 
       {saveError && (
         <p className="rounded-md border border-again px-3 py-2 text-sm text-again" role="alert">
-          Some answers couldn&apos;t be saved. Check your connection; cards you rate now are still scheduled on this
-          device until you reload.
+          Some answers couldn&apos;t be saved. Your browser may be blocking storage for this site, for example
+          in a private window.
         </p>
       )}
 

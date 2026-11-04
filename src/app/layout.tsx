@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 const nav = [
   { href: "/study", label: "Study" },
   { href: "/chart", label: "IPA chart" },
-  { href: "/account", label: "Account" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
