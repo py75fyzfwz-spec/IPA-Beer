@@ -6,6 +6,15 @@ export const sentences: Sentence[] = [
   { id: "cup-of-tea", text: "I'd like a cup of tea.", ipa: "aɪd ˈlaɪk ə ˈkʌp əv ˈtiː", unit: 8, words: ["cup"] },
   { id: "weather-like", text: "What's the weather like?", ipa: "ˈwɒts ðə ˈweðə laɪk", unit: 8, words: ["weather"] },
 
+  // Unit 2: the class "phonetic sentences", copied from the handout.
+  // ˈˈ marks the tonic syllable, | a tone-group boundary, ↓ a step down.
+  { id: "cack-handedly", text: "He caught the ball cack-handedly.", ipa: "hi ˈkɔːt ðə ˈbɔːl kæk ˈˈhændɪdli", unit: 2 },
+  { id: "under-duress", text: "The farmer ploughed the furrow, but only under duress.", ipa: "ðə ˈfɑːmə ˈplaʊd ðə ˈˈfʌrəʊ | bət ˈəʊnli ˈʌndə djuəˈˈres", unit: 2 },
+  { id: "idolatrous-statement", text: "It was an idolatrous statement, not worthy of a man of the cloth.", ipa: "ɪt ˈwɒz ən aɪˈˈdɒlətrəs ˈsteɪtmənt | nɒt ˈwɜːði əv ə mæn əv ðə ˈˈklɒθ", unit: 2 },
+  { id: "meredith-ricardo", text: "Meredith was criticised by Ricardo.", ipa: "ˈmerədɪθ wəz ˈkrɪtɪsaɪzd baɪ rɪˈˈkɑːdəʊ", unit: 2 },
+  // The handout's spelling says "culture and history"; this follows the transcription.
+  { id: "sinologists", text: "Sinologists study Chinese history and culture, said the rector.", ipa: "saɪˈnɒlədʒɪsts ˈstʌdi tʃaɪˈniːz ˈhɪstri ən ˈˈkʌltʃə | ↓ˈsed ðə ˈrektə", unit: 2 },
+
   // Unit 6: /a/ and /e/
   { id: "bad-bed", text: "The man said the bed was bad.", ipa: "ðə ˈmæn ˈsed ðə ˈbed wəz ˈbæd", unit: 6, words: ["man", "said", "bed", "bad"] },
   { id: "pen-pan", text: "Pass me the pen and the pan, please.", ipa: "ˈpɑːs mi ðə ˈpen ən ðə ˈpæn ˈpliːz", unit: 6, words: ["pen", "pan"] },

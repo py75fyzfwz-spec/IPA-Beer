@@ -16,6 +16,51 @@ export const words: Word[] = [
   { id: "bird", spelling: "bird", ipa: "bɜːd", unit: 1 },
   { id: "house", spelling: "house", ipa: "haʊs", unit: 3 },
 
+  // Unit 2: the class worksheets "Reading IPA" 7 and 8, with the
+  // transcriptions exactly as in the answer keys.
+  // Worksheet 7
+  { id: "dodge", spelling: "dodge", ipa: "dɒdʒ", unit: 2 },
+  { id: "dresses", spelling: "dresses", ipa: "ˈdresɪz", unit: 2, requireStress: true },
+  { id: "sound", spelling: "sound", ipa: "saʊnd", unit: 2 },
+  { id: "fine", spelling: "fine", ipa: "faɪn", unit: 2 },
+  { id: "control", spelling: "control", ipa: "kənˈtrəʊl", unit: 2, requireStress: true },
+  { id: "they", spelling: "they", ipa: "ðeɪ", unit: 2 },
+  { id: "interesting", spelling: "interesting", ipa: "ˈɪntrəstɪŋ", unit: 2, requireStress: true },
+  { id: "garden", spelling: "garden", ipa: "ˈɡɑːdən", unit: 2, requireStress: true },
+  { id: "prayer", spelling: "prayer", ipa: "ˈpreɪə", unit: 2, requireStress: true },
+  { id: "true", spelling: "true", ipa: "truː", unit: 2 },
+  // how: already a unit 1 card
+  { id: "daughter", spelling: "daughter", ipa: "ˈdɔːtə", unit: 2, requireStress: true },
+  { id: "friendship", spelling: "friendship", ipa: "ˈfrendʃɪp", unit: 2, requireStress: true },
+  { id: "advise", spelling: "advise", ipa: "ədˈvaɪz", unit: 2, requireStress: true },
+  { id: "coped", spelling: "coped", ipa: "kəʊpt", unit: 2 },
+  { id: "wooden", spelling: "wooden", ipa: "ˈwʊdən", unit: 2, requireStress: true },
+  { id: "ear", spelling: "ear", ipa: "ɪə", unit: 2 },
+  { id: "knowledge", spelling: "knowledge", ipa: "ˈnɒlɪdʒ", unit: 2, requireStress: true },
+  { id: "gender", spelling: "gender", ipa: "ˈdʒendə", unit: 2, requireStress: true },
+  { id: "socks", spelling: "socks", ipa: "sɒks", unit: 2 },
+  // Worksheet 8
+  { id: "appearance", spelling: "appearance", ipa: "əˈpɪərənts", unit: 2, requireStress: true },
+  { id: "staff", spelling: "staff", ipa: "stɑːf", unit: 2 },
+  { id: "teacher", spelling: "teacher", ipa: "ˈtiːtʃə", unit: 2, requireStress: true },
+  { id: "ruler", spelling: "ruler", ipa: "ˈruːlə", unit: 2, requireStress: true },
+  { id: "used", spelling: "used", ipa: "juːzd", unit: 2 },
+  { id: "referral", spelling: "referral", ipa: "riˈfɜːrəl", unit: 2, requireStress: true },
+  { id: "earnings", spelling: "earnings", ipa: "ˌɜːnɪŋz", unit: 2 },
+  { id: "someone", spelling: "someone", ipa: "ˈsʌmwʌn", unit: 2, requireStress: true },
+  { id: "roughness", spelling: "roughness", ipa: "ˈrʌfnəs", unit: 2, requireStress: true },
+  // moon: already a unit 1 card
+  { id: "tall", spelling: "tall", ipa: "tɔːl", unit: 2 },
+  { id: "incoherent", spelling: "incoherent", ipa: "ˌɪnkəʊˈhɪərənt◂", unit: 2, requireStress: true },
+  { id: "collar", spelling: "collar", ipa: "ˈkɒlə", unit: 2, requireStress: true },
+  { id: "agree", spelling: "agree", ipa: "əˈɡriː", unit: 2, requireStress: true },
+  { id: "guilty", spelling: "guilty", ipa: "ˈɡɪlti", unit: 2, requireStress: true },
+  { id: "buys", spelling: "buys", ipa: "baɪz", unit: 2 },
+  { id: "concertina", spelling: "concertina", ipa: "ˌkɒntsəˈtiːnə", unit: 2, requireStress: true },
+  { id: "charm", spelling: "charm", ipa: "tʃɑːm", unit: 2 },
+  { id: "weighing", spelling: "weighing", ipa: "ˈweɪɪŋ", unit: 2, requireStress: true },
+  { id: "steer", spelling: "steer", ipa: "stɪə", unit: 2 },
+
   // Unit 1: the class worksheets "Reading IPA" 1–3, with the transcriptions
   // exactly as in the answer keys (‿ marks an optional ə, ◂ a stress shift).
   // Worksheet 1
