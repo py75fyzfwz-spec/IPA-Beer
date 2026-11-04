@@ -1,4 +1,4 @@
-import { sentences, sounds, words } from "@/content";
+import { sentences, sounds, teacher, words } from "@/content";
 
 // Openly licensed recordings (e.g. CC BY-SA from Wikimedia Commons) must
 // credit their authors. Every audio file with a credit is listed here.
@@ -10,8 +10,14 @@ export default function CreditsPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Audio credits</h1>
+      {teacher && (
+        <p>
+          The recordings are by {teacher}
+          {credited.length > 0 ? ", except those listed below" : ""}. Thank you for letting us use them.
+        </p>
+      )}
       {credited.length === 0 ? (
-        <p className="text-muted">No recordings have been added yet.</p>
+        !teacher && <p className="text-muted">No recordings have been added yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">

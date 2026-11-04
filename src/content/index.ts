@@ -1,7 +1,22 @@
-import { sentences } from "./sentences";
-import { sounds } from "./sounds";
-import type { StudyCard } from "./types";
-import { words } from "./words";
+import { recordings } from "./recordings";
+import { sentences as sentenceEntries } from "./sentences";
+import { sounds as soundEntries } from "./sounds";
+import type { Audio, StudyCard } from "./types";
+import { words as wordEntries } from "./words";
+
+// Attach the teacher's recording to each entry that has none of its own.
+// This runs before allCards is built, because dictation cards need audio.
+function withRecording<T extends { id: string; audio?: Audio }>(kind: string, items: T[]): T[] {
+  return items.map((item) => {
+    const src = recordings[`${kind}:${item.id}`];
+    if (item.audio || !src) return item;
+    return { ...item, audio: { src } };
+  });
+}
+
+const sounds = withRecording("sound", soundEntries);
+const words = withRecording("word", wordEntries);
+const sentences = withRecording("sentence", sentenceEntries);
 
 const byUnit = <T extends { unit: number }>(items: T[]) =>
   [...items].sort((a, b) => a.unit - b.unit);
@@ -35,5 +50,6 @@ export function cardsInUnit(unit: number) {
 }
 
 export { sentences, sounds, words };
+export { teacher } from "./recordings";
 export { units, type Unit } from "./units";
 export { stressMarks, weakVowels } from "./sounds";
