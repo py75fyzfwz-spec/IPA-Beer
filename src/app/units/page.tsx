@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { cardsInUnit, units } from "@/content";
-import { UnitProgressBar } from "./UnitProgressBar";
+import { units } from "@/content";
+import { UnitCards } from "./UnitCards";
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
 
@@ -19,38 +19,19 @@ export default function UnitsPage() {
       </div>
 
       <ol className="flex flex-col divide-y divide-line rounded-xl border border-line bg-surface">
-        {units.map((unit) => {
-          const count = cardsInUnit(unit.number).length;
-          return (
-            <li key={unit.number} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span className="font-medium">
-                  {unit.number}. {unit.title}
-                </span>
-                <span className="text-sm text-muted">
-                  {unit.seminars.length > 0
-                    ? `Seminar ${unit.seminars.map((d) => dateFormat.format(new Date(d))).join(" and ")}`
-                    : "Practice until the PC Pool test"}
-                  {" · "}
-                  {count === 0 ? "no cards yet" : count === 1 ? "1 card" : `${count} cards`}
-                </span>
-                {count > 0 && (
-                  <div className="mt-2 max-w-xs">
-                    <UnitProgressBar unit={unit.number} title={unit.title} />
-                  </div>
-                )}
-              </div>
-              {count > 0 && (
-                <Link
-                  href={`/study?unit=${unit.number}`}
-                  className="rounded-full border border-line px-4 py-1.5 text-sm font-medium hover:border-accent"
-                >
-                  Study
-                </Link>
-              )}
-            </li>
-          );
-        })}
+        {units.map((unit) => (
+          <li key={unit.number} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <UnitCards
+              unit={unit.number}
+              title={unit.title}
+              seminars={
+                unit.seminars.length > 0
+                  ? `Seminar ${unit.seminars.map((d) => dateFormat.format(new Date(d))).join(" and ")}`
+                  : "Practice until the PC Pool test"
+              }
+            />
+          </li>
+        ))}
       </ol>
     </div>
   );

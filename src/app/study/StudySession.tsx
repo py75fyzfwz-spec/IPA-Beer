@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Card, Grade } from "ts-fsrs";
-import { cardsInUnit, units } from "@/content";
+import { units } from "@/content";
 import { ProgressBar } from "@/components/ProgressBar";
 import type { StudyCard } from "@/content/types";
 import { loadProgress, saveReview } from "@/lib/progress";
 import { unitProgress } from "@/lib/unitProgress";
+import { inUnit, loadAllCards } from "@/lib/useCards";
 import { buildQueue, newCard, RELEARN_WINDOW_MS, scheduler } from "@/lib/srs";
 import { CardView } from "./CardView";
 
 type Session =
   | { status: "loading" }
-  | { status: "ready"; unit?: number; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
+  | { status: "ready"; unit?: number; cards: StudyCard[]; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
 
 const EXTRA_NEW = 5;
 
@@ -25,13 +26,20 @@ export function StudySession() {
   useEffect(() => {
     // localStorage only exists in the browser, so load after the first render.
     // /study?unit=5 drills one unit; plain /study is the mixed daily review.
-    const param = Number(new URLSearchParams(window.location.search).get("unit"));
-    const unit = units.some((u) => u.number === param) ? param : undefined;
-    const progress = loadProgress();
-    const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
-    const queue = buildQueue(progress.states, newLeft, new Date(), unit);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSession({ status: "ready", unit, states: progress.states, queue, newLeft, done: 0 });
+    // Cards added in teacher mode come from the server, so wait for them.
+    let cancelled = false;
+    loadAllCards().then((cards) => {
+      if (cancelled) return;
+      const param = Number(new URLSearchParams(window.location.search).get("unit"));
+      const unit = units.some((u) => u.number === param) ? param : undefined;
+      const progress = loadProgress();
+      const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
+      const queue = buildQueue(progress.states, newLeft, new Date(), unit, cards);
+      setSession({ status: "ready", unit, cards, states: progress.states, queue, newLeft, done: 0 });
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const current = session.status === "ready" ? session.queue[0] : undefined;
@@ -82,11 +90,12 @@ export function StudySession() {
   }
 
   const learnMore = () => {
-    const queue = buildQueue(session.states, EXTRA_NEW, new Date(), session.unit);
+    const queue = buildQueue(session.states, EXTRA_NEW, new Date(), session.unit, session.cards);
     setSession({ ...session, queue });
   };
 
   const unit = units.find((u) => u.number === session.unit);
+  const unitCards = unit ? inUnit(session.cards, unit.number) : [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -96,9 +105,9 @@ export function StudySession() {
           {unit ? "All units" : "Study one unit"}
         </Link>
       </div>
-      {unit && cardsInUnit(unit.number).length > 0 && (
+      {unit && unitCards.length > 0 && (
         <ProgressBar
-          progress={unitProgress(cardsInUnit(unit.number), session.states)}
+          progress={unitProgress(unitCards, session.states)}
           label={`Unit ${unit.number}: ${unit.title} progress`}
         />
       )}
