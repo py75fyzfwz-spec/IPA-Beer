@@ -1,4 +1,4 @@
-# IPA
+# Speaking English
 
 Website for learning to read British English (RP) in IPA, built for a German-speaking pronunciation course. Learners go from single sounds to words to sentences, read each transcription aloud, check it against a real recording, and rate themselves. FSRS spaced repetition decides what comes up each day. Dictation cards work the other way: hear a word and type it in IPA on an on-screen symbol keyboard.
 

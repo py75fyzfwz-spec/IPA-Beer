@@ -16,8 +16,8 @@ const ui = Atkinson_Hyperlegible_Next({
 });
 
 export const metadata: Metadata = {
-  title: "IPA",
-  description: "Learn to read British English IPA with spaced repetition.",
+  title: "Speaking English",
+  description: "Practice for the Speaking English class: read British English IPA with spaced repetition.",
 };
 
 const nav = [
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <header className="border-b border-line bg-surface">
           <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-3">
             <Link href="/" className="text-xl font-bold text-ink">
-              IPA
+              Speaking English
             </Link>
             <nav className="flex gap-4 text-sm">
               {nav.map((item) => (
