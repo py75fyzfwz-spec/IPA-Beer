@@ -25,7 +25,7 @@ npm run dev
 
 Add entries to `src/content/words.ts` or `src/content/sentences.ts`. Give words a `spelling` and sentences a `text`: it is shown only after Check, as the answer. Transcriptions use EPD symbols without slashes, with stress marks (`ˈmʌðə`). Keep each `id` stable once people have studied it, because progress is stored per card id.
 
-Recordings go in `public/audio/sounds`, `public/audio/words` or `public/audio/sentences`. Set `audio: { src: "/audio/words/mother.mp3", credit: { … } }` on the entry. Words only get a dictation card once they have a recording. Openly licensed recordings must have a `credit`, which is listed on the Credits page.
+Recordings go in `public/audio/sounds`, `public/audio/words` or `public/audio/sentences`, as mp3. The teacher's recordings are linked in `src/content/recordings.ts` by card id (`"word:mother": "/audio/words/mother.mp3"`), so card content and audio can change separately; set `teacher` there to thank them on the Credits page. Other recordings can instead set `audio: { src, credit: { … } }` directly on the entry, which wins over `recordings.ts`. Words only get a dictation card once they have a recording. Openly licensed recordings must have a `credit`, which is listed on the Credits page.
 
 ### Unlock rules
 
