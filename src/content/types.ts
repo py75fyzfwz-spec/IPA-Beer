@@ -26,6 +26,7 @@ export type Sound = {
 export type Word = {
   id: string; // stable slug: "word:<id>"
   ipa: string; // EPD style, without slashes, with stress marks
+  spelling?: string; // shown only after Check, as the answer
   unit: number; // class unit (see units.ts); lower units are introduced first
   audio?: Audio;
   // Stress marks must be typed in dictation only when true.
@@ -35,6 +36,7 @@ export type Word = {
 export type Sentence = {
   id: string; // stable slug: "sentence:<id>"
   ipa: string; // connected speech, with weak forms
+  text?: string; // ordinary spelling, shown only after Check
   unit: number;
   // Word ids that must be started before this sentence unlocks.
   words?: string[];

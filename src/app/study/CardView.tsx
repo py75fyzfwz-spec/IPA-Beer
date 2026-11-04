@@ -38,6 +38,9 @@ export function CardView(props: Props) {
 // Sound, word and sentence cards: read it aloud, then check with the recording.
 function ReadingCard({ card, state, revealed, onReveal, onRate }: Props) {
   const ipa = card.kind === "sound" ? card.sound.ipa : card.kind === "word" ? card.word.ipa : card.kind === "sentence" ? card.sentence.ipa : "";
+  // The spelling is the answer, so it only appears after Check: learners
+  // read the IPA first, never the other way round.
+  const answer = card.kind === "word" ? card.word.spelling : card.kind === "sentence" ? card.sentence.text : undefined;
   const audio = card.kind === "sound" ? card.sound.audio : card.kind === "word" ? card.word.audio : card.kind === "sentence" ? card.sentence.audio : undefined;
 
   return (
@@ -55,6 +58,7 @@ function ReadingCard({ card, state, revealed, onReveal, onRate }: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-5">
+          {answer && <p className="text-center text-2xl font-medium">{answer}</p>}
           <div className="flex justify-center">
             <PlayButton audio={audio} autoPlay />
           </div>

@@ -23,7 +23,7 @@ npm run dev
 
 ### Adding content
 
-Add entries to `src/content/words.ts` or `src/content/sentences.ts`. Transcriptions use EPD symbols without slashes, with stress marks (`ˈmʌðə`). Keep each `id` stable once people have studied it, because progress is stored per card id.
+Add entries to `src/content/words.ts` or `src/content/sentences.ts`. Give words a `spelling` and sentences a `text`: it is shown only after Check, as the answer. Transcriptions use EPD symbols without slashes, with stress marks (`ˈmʌðə`). Keep each `id` stable once people have studied it, because progress is stored per card id.
 
 Recordings go in `public/audio/sounds`, `public/audio/words` or `public/audio/sentences`. Set `audio: { src: "/audio/words/mother.mp3", credit: { … } }` on the entry. Words only get a dictation card once they have a recording. Openly licensed recordings must have a `credit`, which is listed on the Credits page.
 
