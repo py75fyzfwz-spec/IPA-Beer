@@ -6,6 +6,7 @@ import { Ipa } from "@/components/Ipa";
 import { IpaKeyboard } from "@/components/IpaKeyboard";
 import { PlayButton } from "@/components/PlayButton";
 import { RatingButtons } from "@/components/RatingButtons";
+import { RecordCompare } from "@/components/RecordCompare";
 import { sounds } from "@/content";
 import type { StudyCard } from "@/content/types";
 import { checkDictation, tokenize, type CheckResult } from "@/lib/ipa";
@@ -35,7 +36,8 @@ export function CardView(props: Props) {
   );
 }
 
-// Sound, word and sentence cards: read it aloud, then check with the recording.
+// Sound, word and sentence cards: read it aloud (and record yourself, if you
+// like), then check and compare with the teacher's recording.
 function ReadingCard({ card, state, revealed, onReveal, onRate }: Props) {
   const ipa = card.kind === "sound" ? card.sound.ipa : card.kind === "word" ? card.word.ipa : card.kind === "sentence" ? card.sentence.ipa : "";
   // The spelling is the answer, so it only appears after Check: learners
@@ -49,19 +51,20 @@ function ReadingCard({ card, state, revealed, onReveal, onRate }: Props) {
         <Ipa size={card.kind === "sentence" ? "lg" : "xl"}>{ipa}</Ipa>
       </div>
 
+      {revealed && answer && <p className="-mt-2 text-center text-2xl font-medium">{answer}</p>}
+
+      {/* Stays mounted across Check, so a recording in progress finishes. */}
+      {!revealed && <p className="-mb-3 text-center text-muted">Read it aloud, then check.</p>}
+      <RecordCompare cardId={card.id} teacher={audio} revealed={revealed} />
+
       {!revealed ? (
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-muted">Read it aloud, then check.</p>
+        <div className="flex justify-center">
           <button type="button" onClick={onReveal} className="rounded-full bg-accent px-6 py-2.5 font-medium text-paper">
             Check <span className="opacity-70">(space)</span>
           </button>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
-          {answer && <p className="text-center text-2xl font-medium">{answer}</p>}
-          <div className="flex justify-center">
-            <PlayButton audio={audio} autoPlay />
-          </div>
           {card.kind === "sound" ? (
             <div className="flex flex-col gap-1 text-center">
               <p>As in {card.sound.keyWords.join(", ")}</p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { countRecordings, deleteAllRecordings } from "@/lib/myRecordings";
 import { DEFAULT_NEW_PER_DAY, loadProgress, resetProgress, saveNewPerDay } from "@/lib/progress";
 
 const OPTIONS = [5, 10, 15, 20, 30];
@@ -8,12 +9,25 @@ const OPTIONS = [5, 10, 15, 20, 30];
 export function Settings() {
   const [newPerDay, setNewPerDay] = useState(DEFAULT_NEW_PER_DAY);
   const [status, setStatus] = useState<string | null>(null);
+  const [recordings, setRecordings] = useState(0);
 
   useEffect(() => {
     // localStorage only exists in the browser, so read it after the first render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNewPerDay(loadProgress().newPerDay);
+    countRecordings().then(setRecordings, () => {});
   }, []);
+
+  async function deleteRecordings() {
+    if (!window.confirm("Delete all your recordings on this device? This can't be undone.")) return;
+    try {
+      await deleteAllRecordings();
+      setRecordings(0);
+      setStatus("Recordings deleted.");
+    } catch {
+      setStatus("Couldn't delete your recordings.");
+    }
+  }
 
   function changeLimit(value: number) {
     setNewPerDay(value);
@@ -54,6 +68,22 @@ export function Settings() {
             </option>
           ))}
         </select>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-bold">Your recordings</h2>
+        <p className="text-sm text-muted">
+          When you record yourself on a card, the recording stays in this browser and is never uploaded. The newest
+          one for each card is kept. {recordings === 1 ? "1 card has" : `${recordings} cards have`} a recording.
+        </p>
+        <button
+          type="button"
+          onClick={deleteRecordings}
+          disabled={recordings === 0}
+          className="self-start rounded-full border border-again px-4 py-2 text-sm text-again disabled:opacity-50"
+        >
+          Delete my recordings
+        </button>
       </section>
 
       <section className="flex flex-col gap-2">
