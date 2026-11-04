@@ -16,7 +16,7 @@ const ui = Atkinson_Hyperlegible_Next({
 });
 
 export const metadata: Metadata = {
-  title: "IPA Beer",
+  title: "Beer",
   description: "Learn to read British English IPA with spaced repetition.",
 };
 
@@ -32,8 +32,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <header className="border-b border-line bg-surface">
           <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <Link href="/" className="font-ipa text-xl font-bold text-ink">
-              /aɪ piː eɪ/ <span className="font-sans text-base font-normal text-muted">Beer</span>
+            <Link href="/" className="text-xl font-bold text-ink">
+              Beer
             </Link>
             <nav className="flex gap-4 text-sm">
               {nav.map((item) => (
