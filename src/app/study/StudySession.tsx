@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Card, Grade } from "ts-fsrs";
+import { units } from "@/content";
 import type { StudyCard } from "@/content/types";
 import { loadProgress, saveReview } from "@/lib/progress";
 import { buildQueue, newCard, RELEARN_WINDOW_MS, scheduler } from "@/lib/srs";
@@ -9,7 +11,7 @@ import { CardView } from "./CardView";
 
 type Session =
   | { status: "loading" }
-  | { status: "ready"; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
+  | { status: "ready"; unit?: number; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
 
 const EXTRA_NEW = 5;
 
@@ -20,11 +22,14 @@ export function StudySession() {
 
   useEffect(() => {
     // localStorage only exists in the browser, so load after the first render.
+    // /study?unit=5 drills one unit; plain /study is the mixed daily review.
+    const param = Number(new URLSearchParams(window.location.search).get("unit"));
+    const unit = units.some((u) => u.number === param) ? param : undefined;
     const progress = loadProgress();
     const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
-    const queue = buildQueue(progress.states, newLeft, new Date());
+    const queue = buildQueue(progress.states, newLeft, new Date(), unit);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSession({ status: "ready", states: progress.states, queue, newLeft, done: 0 });
+    setSession({ status: "ready", unit, states: progress.states, queue, newLeft, done: 0 });
   }, []);
 
   const current = session.status === "ready" ? session.queue[0] : undefined;
@@ -75,12 +80,20 @@ export function StudySession() {
   }
 
   const learnMore = () => {
-    const queue = buildQueue(session.states, EXTRA_NEW, new Date());
+    const queue = buildQueue(session.states, EXTRA_NEW, new Date(), session.unit);
     setSession({ ...session, queue });
   };
 
+  const unit = units.find((u) => u.number === session.unit);
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="font-bold">{unit ? `Unit ${unit.number}: ${unit.title}` : "Daily review, all units"}</h1>
+        <Link href="/units" className="text-sm text-muted underline">
+          {unit ? "All units" : "Study one unit"}
+        </Link>
+      </div>
       <div className="flex items-center justify-between text-sm text-muted">
         <span>{session.queue.length} left in this session</span>
         <span>{session.done} done</span>

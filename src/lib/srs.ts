@@ -1,5 +1,5 @@
 import { createEmptyCard, fsrs, generatorParameters, State, type Card, type Grade } from "ts-fsrs";
-import { allCards, sounds } from "@/content";
+import { allCards, cardsInUnit, sounds } from "@/content";
 import type { StudyCard } from "@/content/types";
 import { tokenize } from "./ipa";
 
@@ -53,9 +53,15 @@ export function isUnlocked(card: StudyCard, states: Map<string, Card>) {
 }
 
 // Today's session: due reviews first (most overdue first), then new cards
-// in course order up to the daily limit.
-export function buildQueue(states: Map<string, Card>, newLeft: number, now: Date): StudyCard[] {
-  const due = allCards
+// in course order up to the daily limit. With a unit, only that unit's cards
+// are used, and new words and sentences don't wait for earlier units: every
+// unit is open from the start. Dictation still waits for its word.
+export function buildQueue(states: Map<string, Card>, newLeft: number, now: Date, unit?: number): StudyCard[] {
+  const pool = unit === undefined ? allCards : cardsInUnit(unit);
+  const unlocked = (card: StudyCard, planned: Map<string, Card>) =>
+    unit === undefined || card.kind === "dictation" ? isUnlocked(card, planned) : true;
+
+  const due = pool
     .filter((c) => {
       const s = states.get(c.id);
       return s && s.due <= now;
@@ -66,9 +72,9 @@ export function buildQueue(states: Map<string, Card>, newLeft: number, now: Date
   // Unlocking is checked against a growing set, so a word whose last sound
   // is introduced earlier in this same session can join it too.
   const planned = new Map(states);
-  for (const card of allCards) {
+  for (const card of pool) {
     if (fresh.length >= newLeft) break;
-    if (planned.has(card.id) || !isUnlocked(card, planned)) continue;
+    if (planned.has(card.id) || !unlocked(card, planned)) continue;
     fresh.push(card);
     planned.set(card.id, newCard(now));
   }

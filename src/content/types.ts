@@ -26,7 +26,7 @@ export type Sound = {
 export type Word = {
   id: string; // stable slug: "word:<id>"
   ipa: string; // EPD style, without slashes, with stress marks
-  unit: number; // course order; lower units are introduced first
+  unit: number; // class unit (see units.ts); lower units are introduced first
   audio?: Audio;
   // Stress marks must be typed in dictation only when true.
   requireStress?: boolean;

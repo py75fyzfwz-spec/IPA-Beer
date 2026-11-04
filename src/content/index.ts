@@ -17,5 +17,23 @@ export const allCards: StudyCard[] = [
   ...byUnit(sentences).map((sentence): StudyCard => ({ id: `sentence:${sentence.id}`, kind: "sentence", sentence })),
 ];
 
+// Vowels belong to unit 1, consonants to unit 2.
+export function unitOf(card: StudyCard): number {
+  switch (card.kind) {
+    case "sound":
+      return card.sound.group === "consonant" ? 2 : 1;
+    case "word":
+    case "dictation":
+      return card.word.unit;
+    case "sentence":
+      return card.sentence.unit;
+  }
+}
+
+export function cardsInUnit(unit: number) {
+  return allCards.filter((c) => unitOf(c) === unit);
+}
+
 export { sentences, sounds, words };
+export { units, type Unit } from "./units";
 export { stressMarks, weakVowels } from "./sounds";

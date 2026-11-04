@@ -21,7 +21,8 @@ export const metadata: Metadata = {
 };
 
 const nav = [
-  { href: "/study", label: "Study" },
+  { href: "/study", label: "Daily review" },
+  { href: "/units", label: "Units" },
   { href: "/chart", label: "IPA chart" },
   { href: "/settings", label: "Settings" },
 ];

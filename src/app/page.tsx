@@ -19,7 +19,10 @@ export default function Home() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Link href="/study" className="rounded-full bg-accent px-5 py-2.5 font-medium text-paper">
-            Start studying
+            Daily review
+          </Link>
+          <Link href="/units" className="rounded-full border border-line bg-surface px-5 py-2.5 font-medium">
+            Study a unit
           </Link>
           <Link href="/chart" className="rounded-full border border-line bg-surface px-5 py-2.5 font-medium">
             Open the IPA chart
