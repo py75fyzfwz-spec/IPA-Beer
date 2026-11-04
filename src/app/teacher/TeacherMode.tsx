@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { allCards, units } from "@/content";
 import type { StudyCard } from "@/content/types";
 import { mergeTeacherContent, type TeacherCard, type TeacherContent } from "@/lib/teacherContent";
+import type { SetupCheck } from "@/lib/teacherStore";
 import { AddCard } from "./AddCard";
 import { RecordCards } from "./RecordCards";
 
@@ -23,6 +24,15 @@ export function TeacherMode() {
   const [tab, setTab] = useState<Tab>("record");
   const [unit, setUnit] = useState(units[0].number);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
+  const [setup, setSetup] = useState<SetupCheck[] | null>(null);
+
+  // Check every step a save needs, so a setup problem shows up front
+  // instead of as recordings that quietly fail to save.
+  const checkSetup = useCallback(async () => {
+    setSetup(null);
+    const r = await fetch("/api/teacher/setup", { cache: "no-store" }).catch(() => null);
+    if (r?.ok) setSetup(await r.json());
+  }, []);
 
   const loadContent = useCallback(async () => {
     const r = await fetch("/api/teacher/content", { cache: "no-store" });
@@ -37,7 +47,8 @@ export function TeacherMode() {
     }
     setLoadError(null);
     setContent(body as TeacherContent);
-  }, []);
+    checkSetup();
+  }, [checkSetup]);
 
   useEffect(() => {
     // Remember the last unit, so the teacher picks up where they left off.
@@ -105,6 +116,8 @@ export function TeacherMode() {
           Sign out
         </button>
       </div>
+
+      {setup && setup.some((c) => !c.ok) && <SetupProblems checks={setup} onRecheck={checkSetup} />}
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
@@ -179,6 +192,27 @@ export function TeacherMode() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function SetupProblems({ checks, onRecheck }: { checks: SetupCheck[]; onRecheck: () => void }) {
+  return (
+    <div role="alert" className="flex flex-col gap-3 rounded-xl border border-again bg-surface p-5">
+      <h2 className="font-bold text-again">Recordings and new cards can&apos;t be saved yet</h2>
+      <ul className="flex flex-col gap-1.5 text-sm">
+        {checks.map((c) => (
+          <li key={c.name} className={c.ok ? "text-muted" : "text-ink"}>
+            <span className={c.ok ? "text-good" : "font-bold text-again"}>{c.ok ? "✓" : "✗"}</span> {c.name}: {c.detail}
+          </li>
+        ))}
+      </ul>
+      <p className="text-sm text-muted">
+        After changing a setting in Vercel, redeploy the site, then check again.
+      </p>
+      <button type="button" onClick={onRecheck} className="self-start rounded-full border border-line px-4 py-1.5 text-sm font-medium">
+        Check again
+      </button>
     </div>
   );
 }

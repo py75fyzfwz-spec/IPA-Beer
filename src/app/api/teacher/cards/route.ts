@@ -1,7 +1,7 @@
 import { units } from "@/content";
 import { slugify, type TeacherCard } from "@/lib/teacherContent";
 import { teacherGuard } from "@/lib/teacherGuard";
-import { addCard, deleteCard, loadTeacherContent, staticIds } from "@/lib/teacherStore";
+import { addCard, deleteCard, describeError, loadTeacherContent, staticIds } from "@/lib/teacherStore";
 
 // Add or delete a card made in teacher mode. Teacher mode only.
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     return Response.json(card, { status: 201 });
   } catch (e) {
     console.error("Adding a teacher card failed", e);
-    return Response.json({ error: "Couldn't save the card" }, { status: 502 });
+    return Response.json({ error: `Couldn't save the card: ${describeError(e)}` }, { status: 502 });
   }
 }
 
@@ -64,6 +64,6 @@ export async function DELETE(request: Request) {
     return Response.json({ deleted: cardId });
   } catch (e) {
     console.error("Deleting a teacher card failed", e);
-    return Response.json({ error: "Couldn't delete the card" }, { status: 502 });
+    return Response.json({ error: `Couldn't delete the card: ${describeError(e)}` }, { status: 502 });
   }
 }
