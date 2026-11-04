@@ -47,7 +47,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>
         <footer className="border-t border-line px-4 py-4 text-center text-xs text-muted">
-          British RP, EPD transcription · <Link href="/credits" className="underline">Audio credits</Link>
+          British RP, EPD transcription · <Link href="/credits" className="underline">Audio credits</Link> ·{" "}
+          <Link href="/teacher" className="underline">Teacher mode</Link>
         </footer>
       </body>
     </html>

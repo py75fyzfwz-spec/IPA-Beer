@@ -1,5 +1,5 @@
 import { createEmptyCard, fsrs, generatorParameters, State, type Card, type Grade } from "ts-fsrs";
-import { allCards, cardsInUnit, sounds } from "@/content";
+import { allCards, sounds, unitOf } from "@/content";
 import type { StudyCard } from "@/content/types";
 import { tokenize } from "./ipa";
 
@@ -56,8 +56,15 @@ export function isUnlocked(card: StudyCard, states: Map<string, Card>) {
 // in course order up to the daily limit. With a unit, only that unit's cards
 // are used, and new words and sentences don't wait for earlier units: every
 // unit is open from the start. Dictation still waits for its word.
-export function buildQueue(states: Map<string, Card>, newLeft: number, now: Date, unit?: number): StudyCard[] {
-  const pool = unit === undefined ? allCards : cardsInUnit(unit);
+// `cards` is the full card list, including cards added in teacher mode.
+export function buildQueue(
+  states: Map<string, Card>,
+  newLeft: number,
+  now: Date,
+  unit?: number,
+  cards: StudyCard[] = allCards,
+): StudyCard[] {
+  const pool = unit === undefined ? cards : cards.filter((c) => unitOf(c) === unit);
   const unlocked = (card: StudyCard, planned: Map<string, Card>) =>
     unit === undefined || card.kind === "dictation" ? isUnlocked(card, planned) : true;
 
