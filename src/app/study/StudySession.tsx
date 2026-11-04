@@ -1,0 +1,134 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import type { Card, Grade } from "ts-fsrs";
+import { units } from "@/content";
+import type { StudyCard } from "@/content/types";
+import { loadProgress, saveReview } from "@/lib/progress";
+import { buildQueue, newCard, RELEARN_WINDOW_MS, scheduler } from "@/lib/srs";
+import { CardView } from "./CardView";
+
+type Session =
+  | { status: "loading" }
+  | { status: "ready"; unit?: number; states: Map<string, Card>; queue: StudyCard[]; newLeft: number; done: number };
+
+const EXTRA_NEW = 5;
+
+export function StudySession() {
+  const [session, setSession] = useState<Session>({ status: "loading" });
+  const [revealed, setRevealed] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+
+  useEffect(() => {
+    // localStorage only exists in the browser, so load after the first render.
+    // /study?unit=5 drills one unit; plain /study is the mixed daily review.
+    const param = Number(new URLSearchParams(window.location.search).get("unit"));
+    const unit = units.some((u) => u.number === param) ? param : undefined;
+    const progress = loadProgress();
+    const newLeft = Math.max(0, progress.newPerDay - progress.newToday);
+    const queue = buildQueue(progress.states, newLeft, new Date(), unit);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSession({ status: "ready", unit, states: progress.states, queue, newLeft, done: 0 });
+  }, []);
+
+  const current = session.status === "ready" ? session.queue[0] : undefined;
+
+  const rate = useCallback(
+    (grade: Grade) => {
+      if (session.status !== "ready" || !current) return;
+      const now = new Date();
+      const before = session.states.get(current.id) ?? newCard(now);
+      const result = scheduler.next(before, now, grade);
+
+      const states = new Map(session.states).set(current.id, result.card);
+      const rest = session.queue.slice(1);
+      // Cards in a short learning step come back a few cards later.
+      if (result.card.due.getTime() - now.getTime() < RELEARN_WINDOW_MS) {
+        rest.splice(Math.min(3, rest.length), 0, current);
+      }
+      setSession({ ...session, states, queue: rest, done: session.done + 1 });
+      setRevealed(false);
+
+      try {
+        saveReview(current.id, grade, result);
+      } catch {
+        setSaveError(true);
+      }
+    },
+    [session, current],
+  );
+
+  // Space or Enter checks, 1 to 4 rate. Dictation cards use their own form.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!current || current.kind === "dictation") return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (!revealed && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        setRevealed(true);
+      } else if (revealed && ["1", "2", "3", "4"].includes(e.key)) {
+        rate(Number(e.key) as Grade);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [current, revealed, rate]);
+
+  if (session.status === "loading") {
+    return <p className="text-muted">Loading your cards…</p>;
+  }
+
+  const learnMore = () => {
+    const queue = buildQueue(session.states, EXTRA_NEW, new Date(), session.unit);
+    setSession({ ...session, queue });
+  };
+
+  const unit = units.find((u) => u.number === session.unit);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="font-bold">{unit ? `Unit ${unit.number}: ${unit.title}` : "Daily review, all units"}</h1>
+        <Link href="/units" className="text-sm text-muted underline">
+          {unit ? "All units" : "Study one unit"}
+        </Link>
+      </div>
+      <div className="flex items-center justify-between text-sm text-muted">
+        <span>{session.queue.length} left in this session</span>
+        <span>{session.done} done</span>
+      </div>
+
+      {saveError && (
+        <p className="rounded-md border border-again px-3 py-2 text-sm text-again" role="alert">
+          Some answers couldn&apos;t be saved. Your browser may be blocking storage for this site, for example
+          in a private window.
+        </p>
+      )}
+
+      {current ? (
+        <CardView
+          key={`${current.id}-${session.done}`}
+          card={current}
+          state={session.states.get(current.id) ?? newCard(new Date())}
+          revealed={revealed}
+          onReveal={() => setRevealed(true)}
+          onRate={rate}
+        />
+      ) : (
+        <div className="flex flex-col items-start gap-3 rounded-xl border border-line bg-surface p-6">
+          <h2 className="text-xl font-bold">All done for now</h2>
+          <p className="text-muted">
+            {session.done > 0
+              ? `You reviewed ${session.done} cards. Come back tomorrow for the next ones.`
+              : "Nothing is due right now."}
+          </p>
+          <button type="button" onClick={learnMore} className="rounded-full border border-line px-4 py-2 text-sm font-medium">
+            Learn {EXTRA_NEW} more new cards
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
