@@ -1,5 +1,5 @@
 import { teacherGuard } from "@/lib/teacherGuard";
-import { deleteRecording, isRecordable, saveRecording } from "@/lib/teacherStore";
+import { deleteRecording, describeError, isRecordable, saveRecording } from "@/lib/teacherStore";
 
 // Save or delete the teacher's recording for one card. Teacher mode only.
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return Response.json({ cardId, url: await saveRecording(cardId, audio) });
   } catch (e) {
     console.error("Saving a teacher recording failed", e);
-    return Response.json({ error: "Couldn't save the recording" }, { status: 502 });
+    return Response.json({ error: `Couldn't save the recording: ${describeError(e)}` }, { status: 502 });
   }
 }
 
@@ -37,6 +37,6 @@ export async function DELETE(request: Request) {
     return Response.json({ deleted: cardId });
   } catch (e) {
     console.error("Deleting a teacher recording failed", e);
-    return Response.json({ error: "Couldn't delete the recording" }, { status: 502 });
+    return Response.json({ error: `Couldn't delete the recording: ${describeError(e)}` }, { status: 502 });
   }
 }

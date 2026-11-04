@@ -34,6 +34,7 @@ export function RecordCards({ unit, cards, recordings, builtInAudio, added, jump
   const [take, setTake] = useState<{ cardId: string; blob: Blob; url: string } | null>(null);
   const [uploads, setUploads] = useState<Record<string, Upload>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const recorder = useRecorder(30);
   const player = useRef<HTMLAudioElement | null>(null);
 
@@ -92,7 +93,7 @@ export function RecordCards({ unit, cards, recordings, builtInAudio, added, jump
         });
       } else {
         setUploads((u) => ({ ...u, [cardId]: { state: "failed", blob } }));
-        setMessage(body.error ?? "A recording couldn't be saved. Check the connection and press Retry.");
+        setSaveError(body.error ?? "Check the connection and press Retry.");
       }
     },
     [onSaved],
@@ -177,8 +178,9 @@ export function RecordCards({ unit, cards, recordings, builtInAudio, added, jump
 
       {failed.length > 0 && (
         <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border border-again px-3 py-2 text-sm text-again">
-          <span>
-            {failed.length === 1 ? "1 recording wasn't saved." : `${failed.length} recordings weren't saved.`}
+          <span className="flex-1">
+            <strong>{failed.length === 1 ? "1 recording wasn't saved." : `${failed.length} recordings weren't saved.`}</strong>
+            {saveError && <> {saveError}</>}
           </span>
           <button
             type="button"

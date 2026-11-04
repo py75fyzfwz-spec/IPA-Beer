@@ -27,6 +27,9 @@ create table if not exists public.teacher_recordings (
 alter table public.teacher_cards enable row level security;
 alter table public.teacher_recordings enable row level security;
 
+-- Newer Supabase projects don't always grant table access automatically.
+grant select, insert, update, delete on public.teacher_cards, public.teacher_recordings to service_role;
+
 -- Public bucket, so learners' browsers can play the files directly.
 -- Uploads still go through the website's server only.
 insert into storage.buckets (id, name, public, file_size_limit)
