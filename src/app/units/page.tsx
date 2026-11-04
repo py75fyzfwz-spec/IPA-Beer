@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cardsInUnit, units } from "@/content";
+import { UnitProgressBar } from "./UnitProgressBar";
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
 
@@ -22,7 +23,7 @@ export default function UnitsPage() {
           const count = cardsInUnit(unit.number).length;
           return (
             <li key={unit.number} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-              <div className="flex flex-col">
+              <div className="flex min-w-0 flex-1 flex-col">
                 <span className="font-medium">
                   {unit.number}. {unit.title}
                 </span>
@@ -33,6 +34,11 @@ export default function UnitsPage() {
                   {" · "}
                   {count === 0 ? "no cards yet" : count === 1 ? "1 card" : `${count} cards`}
                 </span>
+                {count > 0 && (
+                  <div className="mt-2 max-w-xs">
+                    <UnitProgressBar unit={unit.number} title={unit.title} />
+                  </div>
+                )}
               </div>
               {count > 0 && (
                 <Link
